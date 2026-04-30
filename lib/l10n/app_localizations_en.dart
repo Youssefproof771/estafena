@@ -102,6 +102,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vodafoneCash => 'Vodafone Cash';
 
   @override
+  String get choosePaymentMethod => 'Choose Payment Method';
+
+  @override
   String get egp => 'EGP';
 
   @override

@@ -284,6 +284,12 @@ abstract class AppLocalizations {
   /// **'Vodafone Cash'**
   String get vodafoneCash;
 
+  /// No description provided for @choosePaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Payment Method'**
+  String get choosePaymentMethod;
+
   /// No description provided for @egp.
   ///
   /// In en, this message translates to:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../database/database_helper.dart';
 import '../models/models.dart';
@@ -20,18 +21,20 @@ class AppProvider extends ChangeNotifier {
   List<Friend> get friends => _friends;
   List<DebtTransaction> get transactions => _transactions;
   List<PaymentMethod> get userPaymentMethods => _userPaymentMethods;
-  Map<int, List<PaymentMethod>> get friendPaymentMethods => _friendPaymentMethods;
+  Map<int, List<PaymentMethod>> get friendPaymentMethods =>
+      _friendPaymentMethods;
   Map<int, double> get netBalances => _netBalances;
-  String get username => _username;
   Locale get locale => _locale;
   bool get loading => _loading;
 
   List<FriendDebtSummary> get dashboardSummaries {
     return _friends
-        .map((f) => FriendDebtSummary(
-              friend: f,
-              netAmount: _netBalances[f.id] ?? 0.0,
-            ))
+        .map(
+          (f) => FriendDebtSummary(
+            friend: f,
+            netAmount: _netBalances[f.id] ?? 0.0,
+          ),
+        )
         .where((s) => !s.settled)
         .toList()
       ..sort((a, b) => b.netAmount.abs().compareTo(a.netAmount.abs()));
@@ -43,10 +46,25 @@ class AppProvider extends ChangeNotifier {
   double get totalIOwe =>
       _netBalances.values.where((v) => v < 0).fold(0.0, (a, b) => a + b.abs());
 
+  // ─── Auth State Getters (NEW) ──────────────────────────────────────────────
+  User? get currentUser => Supabase.instance.client.auth.currentUser;
+
+  // Override username to use Facebook name if logged in
+  String get username =>
+      currentUser?.userMetadata?['full_name'] as String? ?? _username;
+
+  // Get Facebook Avatar
+  String get avatarUrl =>
+      currentUser?.userMetadata?['avatar_url'] as String? ?? '';
+
   // ─── Init ──────────────────────────────────────────────────────────────────
   Future<void> init() async {
     _loading = true;
     notifyListeners();
+    // NEW: Listen to auth state changes so the UI updates automatically after login
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      notifyListeners();
+    });
     await _loadSettings();
     await _loadFriends();
     await _loadNetBalances();
@@ -73,6 +91,19 @@ class AppProvider extends ChangeNotifier {
     _userPaymentMethods = await _db.fetchUserPaymentMethods();
   }
 
+  // ─── Auth Methods ──────────────────────────────────────────────────────────
+  Future<void> signInWithGoogle() async {
+    await Supabase.instance.client.auth.signInWithOAuth(
+      OAuthProvider.google, // Changed from facebook to google
+      // Keep the same redirect link you set up in AndroidManifest/Info.plist
+      redirectTo: 'com.example.estafena://login-callback/',
+    );
+  }
+
+  Future<void> signOut() async {
+    await Supabase.instance.client.auth.signOut();
+  }
+
   // ─── Username ──────────────────────────────────────────────────────────────
   Future<void> updateUsername(String name) async {
     await _db.setSetting('username', name);
@@ -90,10 +121,7 @@ class AppProvider extends ChangeNotifier {
   // ─── Friends ───────────────────────────────────────────────────────────────
   Future<void> addFriend(String username) async {
     if (username.trim().isEmpty) return;
-    final friend = Friend(
-      username: username.trim(),
-      createdAt: DateTime.now(),
-    );
+    final friend = Friend(username: username.trim(), createdAt: DateTime.now());
     final id = await _db.insertFriend(friend);
     _friends.insert(0, friend.copyWith(id: id));
     notifyListeners();
@@ -137,7 +165,10 @@ class AppProvider extends ChangeNotifier {
   }
 
   // ─── Payment Methods (User) ────────────────────────────────────────────────
-  Future<void> addUserPaymentMethod(PaymentMethodType type, String details) async {
+  Future<void> addUserPaymentMethod(
+    PaymentMethodType type,
+    String details,
+  ) async {
     final method = PaymentMethod(type: type, details: details);
     final id = await _db.insertPaymentMethod(method);
     _userPaymentMethods.add(method.copyWith(id: id));
@@ -168,8 +199,15 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> addFriendPaymentMethod(
-      int friendId, PaymentMethodType type, String details) async {
-    final method = PaymentMethod(friendId: friendId, type: type, details: details);
+    int friendId,
+    PaymentMethodType type,
+    String details,
+  ) async {
+    final method = PaymentMethod(
+      friendId: friendId,
+      type: type,
+      details: details,
+    );
     final id = await _db.insertPaymentMethod(method);
     _friendPaymentMethods[friendId] ??= [];
     _friendPaymentMethods[friendId]!.add(method.copyWith(id: id));

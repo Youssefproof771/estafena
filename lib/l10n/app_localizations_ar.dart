@@ -9,7 +9,7 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get appName => 'استفنا';
+  String get appName => 'اصطفينا';
 
   @override
   String get dashboard => 'الرئيسية';
@@ -27,13 +27,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get youOwe => 'أنت مدين';
 
   @override
-  String get estafeto => 'استفنتو؟ 🤙';
+  String get estafeto => 'اصطفيتوا؟ 🤙';
 
   @override
-  String get estafetoPDesc => 'هل تريد تصفير هذا الدين؟';
+  String get estafetoPDesc => 'خلصت حسابك مع الجدع ده؟';
 
   @override
-  String get estafena => 'استفنا! ✅';
+  String get estafena => 'اصطفينا! ✅';
 
   @override
   String get notYet => 'مش دلوقتي';
@@ -100,6 +100,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vodafoneCash => 'فودافون كاش';
+
+  @override
+  String get choosePaymentMethod => 'اختار طريقة الدفع';
 
   @override
   String get egp => 'ج.م';

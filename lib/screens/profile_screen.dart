@@ -30,15 +30,20 @@ class ProfileScreen extends StatelessWidget {
           style: GoogleFonts.spaceGrotesk(color: AppTheme.textPrimary),
           decoration: const InputDecoration(
             labelText: 'Your name',
-            prefixIcon: Icon(Icons.person_rounded,
-                color: AppTheme.textMuted, size: 18),
+            prefixIcon: Icon(
+              Icons.person_rounded,
+              color: AppTheme.textMuted,
+              size: 18,
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: GoogleFonts.spaceGrotesk(color: AppTheme.textSecondary)),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.spaceGrotesk(color: AppTheme.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -96,17 +101,16 @@ class ProfileScreen extends StatelessWidget {
               ),
 
               // Profile Header
+              // Replace the old SliverToBoxAdapter with this:
               SliverToBoxAdapter(
                 child: _ProfileHeader(
-                  username: provider.username,
+                  provider: provider, // Pass the whole provider now
                   onEdit: () => _editUsername(context, provider.username),
                 ),
               ),
 
               // Stats Row
-              SliverToBoxAdapter(
-                child: _StatsRow(provider: provider),
-              ),
+              SliverToBoxAdapter(child: _StatsRow(provider: provider)),
 
               // Payment Methods
               SliverToBoxAdapter(
@@ -116,8 +120,11 @@ class ProfileScreen extends StatelessWidget {
                     title: 'My Payment Methods',
                     trailing: TextButton.icon(
                       onPressed: () => _showAddPaymentMethod(context),
-                      icon: const Icon(Icons.add_rounded,
-                          size: 16, color: AppTheme.accentGold),
+                      icon: const Icon(
+                        Icons.add_rounded,
+                        size: 16,
+                        color: AppTheme.accentGold,
+                      ),
                       label: Text(
                         'Add',
                         style: GoogleFonts.spaceGrotesk(
@@ -144,8 +151,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          const Text('💳',
-                              style: TextStyle(fontSize: 36)),
+                          const Text('💳', style: TextStyle(fontSize: 36)),
                           const SizedBox(height: 10),
                           Text(
                             'Add your payment methods so\nfriends know how to pay you back.',
@@ -171,19 +177,15 @@ class ProfileScreen extends StatelessWidget {
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (ctx, i) {
-                        final method = provider.userPaymentMethods[i];
-                        return PaymentMethodTile(
-                          method: method,
-                          onEdit: () =>
-                              _showEditPaymentMethod(context, method),
-                          onDelete: () =>
-                              provider.deleteUserPaymentMethod(method.id!),
-                        );
-                      },
-                      childCount: provider.userPaymentMethods.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((ctx, i) {
+                      final method = provider.userPaymentMethods[i];
+                      return PaymentMethodTile(
+                        method: method,
+                        onEdit: () => _showEditPaymentMethod(context, method),
+                        onDelete: () =>
+                            provider.deleteUserPaymentMethod(method.id!),
+                      );
+                    }, childCount: provider.userPaymentMethods.length),
                   ),
                 ),
 
@@ -200,8 +202,7 @@ class ProfileScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
                   child: _LanguageSelector(
                     currentLocale: provider.locale,
-                    onChanged: (locale) =>
-                        provider.setLocale(locale),
+                    onChanged: (locale) => provider.setLocale(locale),
                   ),
                 ),
               ),
@@ -215,93 +216,175 @@ class ProfileScreen extends StatelessWidget {
 
 // ─── Profile Header ───────────────────────────────────────────────────────────
 class _ProfileHeader extends StatelessWidget {
-  final String username;
+  final AppProvider provider;
   final VoidCallback onEdit;
 
-  const _ProfileHeader({required this.username, required this.onEdit});
+  const _ProfileHeader({required this.provider, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
+    final user = provider.currentUser;
+    final isLoggedIn = user != null;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppTheme.accentGold.withOpacity(0.15),
-              AppTheme.surfaceElevated,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: AppTheme.accentGold.withOpacity(0.3),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.accentGold, AppTheme.accentGoldLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(18),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.accentGold.withOpacity(0.15),
+                  AppTheme.surfaceElevated,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              child: Center(
-                child: Text(
-                  username.isNotEmpty ? username[0].toUpperCase() : '?',
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.bg,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppTheme.accentGold.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                // Avatar (Facebook Image OR Initial)
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppTheme.accentGold, AppTheme.accentGoldLight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    image: isLoggedIn && provider.avatarUrl.isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(provider.avatarUrl),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: !isLoggedIn || provider.avatarUrl.isEmpty
+                      ? Center(
+                          child: Text(
+                            provider.username.isNotEmpty
+                                ? provider.username[0].toUpperCase()
+                                : '?',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.bg,
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        provider.username,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        isLoggedIn ? 'Verified User ✨' : 'Local User 👋',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    username,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: AppTheme.textPrimary,
+                // Only allow manual name edits if not logged into Facebook
+                if (!isLoggedIn)
+                  IconButton(
+                    onPressed: onEdit,
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceHigh,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppTheme.borderColor),
+                      ),
+                      child: const Icon(
+                        Icons.edit_rounded,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Authentication Buttons
+          if (!isLoggedIn)
+            ElevatedButton(
+              onPressed: () => provider.signInWithGoogle(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    Colors.white, // Google buttons are typically white
+                foregroundColor: Colors.black87, // Dark text
+                minimumSize: const Size(double.infinity, 50),
+                elevation: 1, // Slight shadow for depth
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: const BorderSide(
+                    color: Color(0xFFE0E0E0),
+                  ), // Light grey border
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // A simple stylized 'G' since Flutter lacks a built-in Google icon
                   Text(
-                    'That\'s you 👋',
+                    'G',
                     style: GoogleFonts.spaceGrotesk(
-                      fontSize: 13,
-                      color: AppTheme.textSecondary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF4285F4), // Google Blue
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Continue with Google',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
               ),
-            ),
-            IconButton(
-              onPressed: onEdit,
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceHigh,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppTheme.borderColor),
+            )
+          else
+            OutlinedButton(
+              onPressed: () => provider.signOut(),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.debtRed,
+                side: const BorderSide(color: AppTheme.borderColor),
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.edit_rounded,
-                    size: 16, color: AppTheme.textSecondary),
+              ),
+              child: Text(
+                'Sign Out',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -316,8 +399,7 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = provider.friends.length;
-    final withDebt =
-        provider.netBalances.values.where((v) => v != 0).length;
+    final withDebt = provider.netBalances.values.where((v) => v != 0).length;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -325,10 +407,7 @@ class _StatsRow extends StatelessWidget {
         children: [
           _StatItem(label: 'Friends', value: '$total', emoji: '👥'),
           const SizedBox(width: 12),
-          _StatItem(
-              label: 'Active debts',
-              value: '$withDebt',
-              emoji: '💸'),
+          _StatItem(label: 'Active debts', value: '$withDebt', emoji: '💸'),
           const SizedBox(width: 12),
           _StatItem(
             label: 'Owed to you',
@@ -437,8 +516,12 @@ class _LanguageSelector extends StatelessWidget {
             selected: currentLocale.languageCode == 'en',
             onTap: () => onChanged(const Locale('en')),
           ),
-          const Divider(height: 1, color: AppTheme.borderColor,
-              indent: 16, endIndent: 16),
+          const Divider(
+            height: 1,
+            color: AppTheme.borderColor,
+            indent: 16,
+            endIndent: 16,
+          ),
           _LangOption(
             flag: '🇪🇬',
             label: 'العربية',
@@ -492,8 +575,11 @@ class _LangOption extends StatelessWidget {
                   color: AppTheme.accentGold,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.check_rounded,
-                    size: 12, color: AppTheme.bg),
+                child: const Icon(
+                  Icons.check_rounded,
+                  size: 12,
+                  color: AppTheme.bg,
+                ),
               )
             else
               Container(

@@ -1,3 +1,4 @@
+import 'package:estafena/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -31,10 +32,10 @@ class DashboardScreen extends StatelessWidget {
               _buildAppBar(context, provider),
               _buildSummaryCards(context, provider),
               if (summaries.isEmpty)
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   child: EmptyState(
                     emoji: '🤝',
-                    message: 'All clear! No debts tracked yet.',
+                    message: AppLocalizations.of(context)!.noDashboardItems,
                   ),
                 )
               else
@@ -212,9 +213,10 @@ class _DebtCardState extends State<_DebtCard>
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
-    _scaleAnim = Tween(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOut),
-    );
+    _scaleAnim = Tween(
+      begin: 1.0,
+      end: 0.97,
+    ).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -250,8 +252,9 @@ class _DebtCardState extends State<_DebtCard>
 
   void _showPaySheet() async {
     final provider = context.read<AppProvider>();
-    final methods =
-        await provider.getFriendPaymentMethods(widget.summary.friend.id!);
+    final methods = await provider.getFriendPaymentMethods(
+      widget.summary.friend.id!,
+    );
     if (!mounted) return;
     showModalBottomSheet(
       context: context,
@@ -269,8 +272,9 @@ class _DebtCardState extends State<_DebtCard>
   Widget build(BuildContext context) {
     final s = widget.summary;
     final isGreen = s.theyOweMe;
-    final borderColor =
-        isGreen ? AppTheme.debtGreenBorder : AppTheme.debtRedBorder;
+    final borderColor = isGreen
+        ? AppTheme.debtGreenBorder
+        : AppTheme.debtRedBorder;
     final bgColor = isGreen ? AppTheme.debtGreenBg : AppTheme.debtRedBg;
     final accentColor = isGreen ? AppTheme.debtGreen : AppTheme.debtRed;
     final glowColor = isGreen ? AppTheme.debtGreen : AppTheme.debtRed;
@@ -364,7 +368,9 @@ class _DebtCardState extends State<_DebtCard>
                         onTap: _showPaySheet,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 6),
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: AppTheme.debtRed,
                             borderRadius: BorderRadius.circular(8),
@@ -382,12 +388,16 @@ class _DebtCardState extends State<_DebtCard>
                     else
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 6),
+                          horizontal: 14,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.debtGreen.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                              color: AppTheme.debtGreenBorder, width: 1),
+                            color: AppTheme.debtGreenBorder,
+                            width: 1,
+                          ),
                         ),
                         child: Text(
                           'Estafeto? 🤙',
@@ -456,8 +466,7 @@ class _EstafetoDialog extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text:
-                        '${summary.netAmount.toStringAsFixed(0)} EGP',
+                    text: '${summary.netAmount.toStringAsFixed(0)} EGP',
                     style: GoogleFonts.spaceGrotesk(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -486,11 +495,14 @@ class _EstafetoDialog extends StatelessWidget {
                       side: const BorderSide(color: AppTheme.borderColor),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       'Not Yet',
-                      style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -502,18 +514,21 @@ class _EstafetoDialog extends StatelessWidget {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     onPressed: () async {
-                      await context
-                          .read<AppProvider>()
-                          .clearDebt(summary.friend.id!);
+                      await context.read<AppProvider>().clearDebt(
+                        summary.friend.id!,
+                      );
                       if (context.mounted) Navigator.pop(context);
                     },
                     child: Text(
                       'Estafena! ✅',
                       style: GoogleFonts.spaceGrotesk(
-                          fontWeight: FontWeight.w700, fontSize: 13),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -607,7 +622,7 @@ class _PaymentOptionsSheetState extends State<_PaymentOptionsSheet> {
                     ),
                   ),
                   Text(
-                    'Choose payment method',
+                    AppLocalizations.of(context)!.choosePaymentMethod,
                     style: GoogleFonts.spaceGrotesk(
                       fontSize: 13,
                       color: AppTheme.textSecondary,
@@ -676,8 +691,10 @@ class _PayMethodRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Center(
-              child: Text(method.type.icon,
-                  style: const TextStyle(fontSize: 22)),
+              child: Text(
+                method.type.icon,
+                style: const TextStyle(fontSize: 22),
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -705,15 +722,20 @@ class _PayMethodRow extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.copy_rounded,
-                size: 18, color: AppTheme.textMuted),
+            icon: const Icon(
+              Icons.copy_rounded,
+              size: 18,
+              color: AppTheme.textMuted,
+            ),
             onPressed: () {
               // ignore: deprecated_member_use
               // Clipboard.setData...
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Copied ${method.details}',
-                      style: GoogleFonts.spaceGrotesk()),
+                  content: Text(
+                    'Copied ${method.details}',
+                    style: GoogleFonts.spaceGrotesk(),
+                  ),
                   duration: const Duration(seconds: 1),
                 ),
               );

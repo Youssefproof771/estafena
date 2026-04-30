@@ -1,25 +1,29 @@
+import 'package:estafena/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart'; // NEW IMPORT
+import 'widgets/connectivity_wrapper.dart';
 import 'providers/app_provider.dart';
 import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
 
-// Generated localization import — run `flutter gen-l10n` to create
-// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Force portrait mode
+  // NEW: Initialize Supabase
+  await Supabase.initialize(
+    url: 'https://jjxcogznffcpjhpchnsr.supabase.co', // Paste your URL[cite: 1]
+    anonKey:
+        'sb_publishable_zwt88H2UwyyHwyJd8MMiwQ_X4s7M8pQ', // Paste your Anon Key[cite: 1]
+  );
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Status bar style
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -33,10 +37,7 @@ void main() async {
   await provider.init();
 
   runApp(
-    ChangeNotifierProvider.value(
-      value: provider,
-      child: const EstafenaApp(),
-    ),
+    ChangeNotifierProvider.value(value: provider, child: const EstafenaApp()),
   );
 }
 
@@ -52,16 +53,14 @@ class EstafenaApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       locale: locale,
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ar'),
-      ],
+      supportedLocales: const [Locale('en'), Locale('ar')],
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const HomeScreen(),
+      home: const ConnectivityWrapper(child: HomeScreen()),
     );
   }
 }

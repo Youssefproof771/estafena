@@ -4,11 +4,7 @@ class Friend {
   final String username;
   final DateTime createdAt;
 
-  const Friend({
-    this.id,
-    required this.username,
-    required this.createdAt,
-  });
+  const Friend({this.id, required this.username, required this.createdAt});
 
   Friend copyWith({int? id, String? username, DateTime? createdAt}) {
     return Friend(
@@ -19,16 +15,16 @@ class Friend {
   }
 
   Map<String, dynamic> toMap() => {
-        if (id != null) 'id': id,
-        'username': username,
-        'created_at': createdAt.toIso8601String(),
-      };
+    if (id != null) 'id': id,
+    'username': username,
+    'created_at': createdAt.toIso8601String(),
+  };
 
   factory Friend.fromMap(Map<String, dynamic> map) => Friend(
-        id: map['id'] as int?,
-        username: map['username'] as String,
-        createdAt: DateTime.parse(map['created_at'] as String),
-      );
+    id: map['id'] as int?,
+    username: map['username'] as String,
+    createdAt: DateTime.parse(map['created_at'] as String),
+  );
 }
 
 // ─── Transaction Model ────────────────────────────────────────────────────────
@@ -70,22 +66,22 @@ class DebtTransaction {
   }
 
   Map<String, dynamic> toMap() => {
-        if (id != null) 'id': id,
-        'friend_id': friendId,
-        'amount': amount,
-        'paid_by_me': paidByMe ? 1 : 0,
-        'note': note,
-        'created_at': createdAt.toIso8601String(),
-      };
+    if (id != null) 'id': id,
+    'friend_id': friendId,
+    'amount': amount,
+    'paid_by_me': paidByMe, // Changed from ternary
+    'note': note,
+    'created_at': createdAt.toIso8601String(),
+  };
 
   factory DebtTransaction.fromMap(Map<String, dynamic> map) => DebtTransaction(
-        id: map['id'] as int?,
-        friendId: map['friend_id'] as int,
-        amount: (map['amount'] as num).toDouble(),
-        paidByMe: (map['paid_by_me'] as int) == 1,
-        note: map['note'] as String?,
-        createdAt: DateTime.parse(map['created_at'] as String),
-      );
+    id: map['id'] as int?,
+    friendId: map['friend_id'] as int,
+    amount: (map['amount'] as num).toDouble(),
+    paidByMe: map['paid_by_me'] as bool, // Changed from int conversion
+    note: map['note'] as String?,
+    createdAt: DateTime.parse(map['created_at'] as String),
+  );
 }
 
 // ─── Payment Method Model ─────────────────────────────────────────────────────
@@ -112,9 +108,8 @@ extension PaymentMethodTypeExt on PaymentMethodType {
 
   String toDbString() => name;
 
-  static PaymentMethodType fromDbString(String s) =>
-      PaymentMethodType.values.firstWhere((e) => e.name == s,
-          orElse: () => PaymentMethodType.instapay);
+  static PaymentMethodType fromDbString(String s) => PaymentMethodType.values
+      .firstWhere((e) => e.name == s, orElse: () => PaymentMethodType.instapay);
 }
 
 class PaymentMethod {
@@ -149,20 +144,20 @@ class PaymentMethod {
   }
 
   Map<String, dynamic> toMap() => {
-        if (id != null) 'id': id,
-        'user_id': userId,
-        'friend_id': friendId,
-        'type': type.toDbString(),
-        'details': details,
-      };
+    if (id != null) 'id': id,
+    'user_id': userId,
+    'friend_id': friendId,
+    'type': type.toDbString(),
+    'details': details,
+  };
 
   factory PaymentMethod.fromMap(Map<String, dynamic> map) => PaymentMethod(
-        id: map['id'] as int?,
-        userId: map['user_id'] as int?,
-        friendId: map['friend_id'] as int?,
-        type: PaymentMethodTypeExt.fromDbString(map['type'] as String),
-        details: map['details'] as String,
-      );
+    id: map['id'] as int?,
+    userId: map['user_id'] as int?,
+    friendId: map['friend_id'] as int?,
+    type: PaymentMethodTypeExt.fromDbString(map['type'] as String),
+    details: map['details'] as String,
+  );
 }
 
 // ─── App User Model ───────────────────────────────────────────────────────────

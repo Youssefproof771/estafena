@@ -31,6 +31,7 @@
   "delete": "Delete",
   "instapay": "InstaPay",
   "vodafoneCash": "Vodafone Cash",
+  "choosePaymentMethod": "Choose Payment Method",
   "egp": "EGP",
   "netBalance": "Net Balance",
   "addTransaction": "Add Transaction",
